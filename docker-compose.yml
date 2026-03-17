@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: curtain_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: RootOnly!2026
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database_init.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
+      - ./database_users.sql:/docker-entrypoint-initdb.d/01_users.sql:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: curtain_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: curtain_admin
+      PMA_PASSWORD: CurtainAdmin!2026
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb_data:

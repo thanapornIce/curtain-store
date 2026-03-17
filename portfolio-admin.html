@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+	<title>จัดการผลงาน</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/png" href="images/icons/favicon.png"/>
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<style>
+		.admin-hero { padding: 60px 0 20px; }
+		.admin-card { border: 1px solid #eee; border-radius: 12px; padding: 20px; background: #fff; }
+		.admin-table th, .admin-table td { vertical-align: middle; }
+		.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+		@media (max-width: 992px) { .admin-grid { grid-template-columns: 1fr; } }
+		.preview-img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid #eee; }
+		.badge-off { background: #f0f0f0; color: #666; }
+	</style>
+</head>
+<body class="animsition" data-enable-animsition="true">
+	<section class="admin-hero bg0">
+		<div class="container">
+			<h2 class="ltext-105 cl2">จัดการผลงาน</h2>
+			<p class="stext-113 cl6">สำหรับผู้ดูแลระบบเท่านั้น</p>
+		</div>
+	</section>
+
+	<section class="bg0 p-b-60">
+		<div class="container">
+			<div id="adminNotice" class="alert alert-warning" style="display:none;"></div>
+
+			<div class="admin-grid">
+				<div class="admin-card">
+					<h5 class="mtext-104 cl2 p-b-15">ฟอร์มผลงาน</h5>
+					<form id="portfolioForm">
+						<input type="hidden" name="id" id="portfolioId">
+
+						<div class="form-group">
+							<label>ชื่อผลงาน</label>
+							<input class="form-control" type="text" name="title" id="title" required>
+						</div>
+
+						<div class="form-group">
+							<label>ประเภท</label>
+							<input class="form-control" type="text" name="category" id="category" required>
+						</div>
+
+						<div class="form-group">
+							<label>สถานที่</label>
+							<input class="form-control" type="text" name="location" id="location">
+						</div>
+
+					<div class="form-group">
+						<label>รูปหน้าปก (URL)</label>
+						<input class="form-control" type="text" name="cover_image" id="coverImage" required>
+					</div>
+					<div class="form-group">
+						<label>อัปโหลดรูปหน้าปก</label>
+						<div class="d-flex" style="gap:10px; flex-wrap: wrap;">
+							<input class="form-control" type="file" id="coverUpload" accept="image/*">
+							<button type="button" class="btn btn-outline-dark" id="uploadCoverBtn">อัปโหลด</button>
+						</div>
+					</div>
+
+						<div class="form-group">
+							<label>ลิงก์รายละเอียด (เว้นว่างได้)</label>
+							<input class="form-control" type="text" name="detail_url" id="detailUrl" placeholder="portfolio-detail.html?work=1">
+						</div>
+
+						<div class="form-group">
+							<label>คำอธิบาย</label>
+							<textarea class="form-control" name="description" id="description" rows="3"></textarea>
+						</div>
+
+						<div class="form-group">
+							<label>พื้นที่ติดตั้ง (เช่น ห้องนอน / ห้องรับแขก)</label>
+							<input class="form-control" type="text" name="spaces" id="spaces">
+						</div>
+
+						<div class="form-group">
+							<label>ระยะเวลาดำเนินงาน (วัน)</label>
+							<input class="form-control" type="number" name="duration_days" id="durationDays" min="0">
+						</div>
+
+						<div class="form-group">
+							<label>วิดีโอ (URL)</label>
+							<input class="form-control" type="text" name="video_url" id="videoUrl" placeholder="videos/project-1.mp4">
+						</div>
+
+					<div class="form-group">
+						<label>รูปแกลเลอรี (คั่นด้วย ,)</label>
+						<textarea class="form-control" name="images" id="images" rows="2" placeholder="images/p1.jpg, images/p1.1.jpg"></textarea>
+					</div>
+					<div class="form-group">
+						<label>อัปโหลดรูปแกลเลอรี</label>
+						<div class="d-flex" style="gap:10px; flex-wrap: wrap;">
+							<input class="form-control" type="file" id="galleryUpload" accept="image/*" multiple>
+							<button type="button" class="btn btn-outline-dark" id="uploadGalleryBtn">อัปโหลด</button>
+						</div>
+					</div>
+
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label>ลำดับการแสดงผล</label>
+								<input class="form-control" type="number" name="sort_order" id="sortOrder" value="0">
+							</div>
+							<div class="form-group col-md-6">
+								<label>สถานะ</label>
+								<select class="form-control" name="is_active" id="isActive">
+									<option value="1">แสดง</option>
+									<option value="0">ซ่อน</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="d-flex" style="gap:12px;">
+							<button type="submit" class="btn btn-dark">บันทึก</button>
+							<button type="button" id="resetForm" class="btn btn-outline-secondary">ล้างฟอร์ม</button>
+						</div>
+					</form>
+				</div>
+
+				<div class="admin-card">
+					<h5 class="mtext-104 cl2 p-b-15">พรีวิวรูปหน้าปก</h5>
+					<img id="coverPreview" class="preview-img" src="images/h01.jpg" alt="preview">
+					<div class="p-t-20">
+						<p class="stext-113 cl6" id="previewTitle">ตัวอย่างผลงาน</p>
+						<p class="portfolio-meta" id="previewMeta"></p>
+					</div>
+				</div>
+			</div>
+
+			<div class="admin-card p-t-30">
+				<h5 class="mtext-104 cl2 p-b-15">รายการผลงาน</h5>
+				<div class="table-responsive">
+					<table class="table admin-table">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>ชื่อผลงาน</th>
+								<th>ประเภท</th>
+								<th>สถานะ</th>
+								<th>จัดการ</th>
+							</tr>
+						</thead>
+						<tbody id="portfolioTable"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script>
+(function () {
+  const form = document.getElementById('portfolioForm');
+  const notice = document.getElementById('adminNotice');
+  const table = document.getElementById('portfolioTable');
+  const previewImg = document.getElementById('coverPreview');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewMeta = document.getElementById('previewMeta');
+
+  const fields = {
+    id: document.getElementById('portfolioId'),
+    title: document.getElementById('title'),
+    category: document.getElementById('category'),
+    location: document.getElementById('location'),
+    cover_image: document.getElementById('coverImage'),
+    detail_url: document.getElementById('detailUrl'),
+    description: document.getElementById('description'),
+    spaces: document.getElementById('spaces'),
+    duration_days: document.getElementById('durationDays'),
+    video_url: document.getElementById('videoUrl'),
+    images: document.getElementById('images'),
+    sort_order: document.getElementById('sortOrder'),
+    is_active: document.getElementById('isActive')
+  };
+  const coverUpload = document.getElementById('coverUpload');
+  const galleryUpload = document.getElementById('galleryUpload');
+
+  function showNotice(message, type) {
+    notice.className = 'alert alert-' + (type || 'warning');
+    notice.textContent = message;
+    notice.style.display = 'block';
+  }
+
+  function clearNotice() {
+    notice.style.display = 'none';
+  }
+
+  function updatePreview() {
+    previewImg.src = fields.cover_image.value || 'images/h01.jpg';
+    previewTitle.textContent = fields.title.value || 'ตัวอย่างผลงาน';
+    const meta = [fields.category.value, fields.location.value].filter(Boolean).join(' • ');
+    previewMeta.textContent = meta;
+  }
+
+  function uploadFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return $.ajax({
+      url: 'auth/portfolio_upload.php',
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      dataType: 'json'
+    });
+  }
+
+  function appendImages(urls) {
+    const current = fields.images.value.trim();
+    const prefix = current ? current.replace(/\s*$/, '') + ', ' : '';
+    fields.images.value = prefix + urls.join(', ');
+  }
+
+  function fillForm(item) {
+    fields.id.value = item.id || '';
+    fields.title.value = item.title || '';
+    fields.category.value = item.category || '';
+    fields.location.value = item.location || '';
+    fields.cover_image.value = item.cover_image || '';
+    fields.detail_url.value = item.detail_url || '';
+    fields.description.value = item.description || '';
+    fields.spaces.value = item.spaces || '';
+    fields.duration_days.value = item.duration_days || '';
+    fields.video_url.value = item.video_url || '';
+    fields.images.value = item.images ? item.images.join(', ') : '';
+    fields.sort_order.value = item.sort_order || 0;
+    fields.is_active.value = String(item.is_active ?? 1);
+    updatePreview();
+  }
+
+  function resetForm() {
+    form.reset();
+    fields.id.value = '';
+    updatePreview();
+  }
+
+  function serializeForm() {
+    const data = {
+      action: fields.id.value ? 'update' : 'create',
+      id: fields.id.value,
+      title: fields.title.value,
+      category: fields.category.value,
+      location: fields.location.value,
+      cover_image: fields.cover_image.value,
+      detail_url: fields.detail_url.value,
+      description: fields.description.value,
+      spaces: fields.spaces.value,
+      duration_days: fields.duration_days.value,
+      video_url: fields.video_url.value,
+      images: fields.images.value,
+      sort_order: fields.sort_order.value,
+      is_active: fields.is_active.value
+    };
+    return data;
+  }
+
+  function loadItems() {
+    $.getJSON('auth/portfolio_manage.php', { action: 'list' })
+      .done(function (res) {
+        if (!res || !res.success) {
+          showNotice('ไม่สามารถโหลดข้อมูลได้', 'warning');
+          return;
+        }
+        clearNotice();
+        const items = res.data.items || [];
+        renderTable(items);
+      })
+      .fail(function (xhr) {
+        if (xhr.status === 401) return showNotice('กรุณาเข้าสู่ระบบก่อน', 'warning');
+        if (xhr.status === 403) return showNotice('บัญชีนี้ไม่มีสิทธิ์', 'danger');
+        showNotice('ไม่สามารถโหลดข้อมูลได้', 'warning');
+      });
+  }
+
+  function renderTable(items) {
+    if (!items.length) {
+      table.innerHTML = '<tr><td colspan="5">ยังไม่มีข้อมูล</td></tr>';
+      return;
+    }
+
+    table.innerHTML = items.map(function (item) {
+      const badge = item.is_active ? '<span class="badge badge-success">แสดง</span>' : '<span class="badge badge-off">ซ่อน</span>';
+      return (
+        '<tr>' +
+        '  <td>' + item.id + '</td>' +
+        '  <td>' + item.title + '</td>' +
+        '  <td>' + item.category + '</td>' +
+        '  <td>' + badge + '</td>' +
+        '  <td>' +
+        '    <button class="btn btn-sm btn-outline-dark" data-action="edit" data-id="' + item.id + '">แก้ไข</button> ' +
+        '    <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="' + item.id + '">ลบ</button>' +
+        '  </td>' +
+        '</tr>'
+      );
+    }).join('');
+  }
+
+  function loadItemDetail(id, cb) {
+    $.getJSON('auth/portfolio_detail.php', { id: id })
+      .done(function (res) {
+        if (!res || !res.success || !res.data || !res.data.item) return;
+        const item = res.data.item;
+        item.images = res.data.images || [];
+        cb(item);
+      });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearNotice();
+
+    const data = serializeForm();
+    $.post('auth/portfolio_manage.php', data, function (res) {
+      if (!res || !res.success) {
+        showNotice(res && res.message ? res.message : 'บันทึกไม่สำเร็จ', 'warning');
+        return;
+      }
+      showNotice('บันทึกสำเร็จ', 'success');
+      resetForm();
+      loadItems();
+    }, 'json').fail(function () {
+      showNotice('บันทึกไม่สำเร็จ', 'warning');
+    });
+  });
+
+  document.getElementById('resetForm').addEventListener('click', function () {
+    resetForm();
+  });
+
+  document.getElementById('uploadCoverBtn').addEventListener('click', function () {
+    clearNotice();
+    if (!coverUpload.files || !coverUpload.files.length) {
+      showNotice('กรุณาเลือกไฟล์รูปหน้าปก', 'warning');
+      return;
+    }
+    uploadFile(coverUpload.files[0])
+      .done(function (res) {
+        if (!res || !res.success) {
+          showNotice('อัปโหลดไม่สำเร็จ', 'warning');
+          return;
+        }
+        fields.cover_image.value = res.data.url;
+        updatePreview();
+        showNotice('อัปโหลดสำเร็จ', 'success');
+      })
+      .fail(function (xhr) {
+        if (xhr.status === 401) return showNotice('กรุณาเข้าสู่ระบบก่อน', 'warning');
+        if (xhr.status === 403) return showNotice('บัญชีนี้ไม่มีสิทธิ์', 'danger');
+        showNotice('อัปโหลดไม่สำเร็จ', 'warning');
+      });
+  });
+
+  document.getElementById('uploadGalleryBtn').addEventListener('click', function () {
+    clearNotice();
+    if (!galleryUpload.files || !galleryUpload.files.length) {
+      showNotice('กรุณาเลือกไฟล์รูปแกลเลอรี', 'warning');
+      return;
+    }
+
+    const files = Array.from(galleryUpload.files);
+    const uploaded = [];
+
+    function next() {
+      if (!files.length) {
+        if (uploaded.length) {
+          appendImages(uploaded);
+          showNotice('อัปโหลดสำเร็จ', 'success');
+        }
+        return;
+      }
+
+      const file = files.shift();
+      uploadFile(file)
+        .done(function (res) {
+          if (res && res.success && res.data && res.data.url) {
+            uploaded.push(res.data.url);
+          }
+          next();
+        })
+        .fail(function () {
+          next();
+        });
+    }
+
+    next();
+  });
+
+  Object.values(fields).forEach(function (input) {
+    if (!input || !input.addEventListener) return;
+    input.addEventListener('input', updatePreview);
+  });
+
+  table.addEventListener('click', function (e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const id = btn.getAttribute('data-id');
+
+    if (action === 'edit') {
+      loadItemDetail(id, fillForm);
+    }
+
+    if (action === 'delete') {
+      if (!confirm('ยืนยันการลบรายการนี้?')) return;
+      $.post('auth/portfolio_manage.php', { action: 'delete', id: id }, function (res) {
+        if (!res || !res.success) {
+          showNotice(res && res.message ? res.message : 'ลบไม่สำเร็จ', 'warning');
+          return;
+        }
+        showNotice('ลบสำเร็จ', 'success');
+        loadItems();
+      }, 'json');
+    }
+  });
+
+  updatePreview();
+  loadItems();
+})();
+</script>
+</body>
+</html>
